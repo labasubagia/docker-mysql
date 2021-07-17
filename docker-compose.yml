@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  mysql:
+    build: ./docker/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - 3306:3306
+    volumes:
+      - main_mysql:/var/lib/mysql
+      - ./shared:/app/shared
+
+  redis:
+    image: redis:alpine
+    restart: always
+    ports:
+      - 6379:6379
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    environment:
+      ADMINER_PLUGINS: tables-filter tinymce dump-json
+      ADMINER_DEFAULT_SERVER: mysql
+    volumes:
+      - ./config/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 8081:80
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: mysql
+    volumes:
+      - ./config/uploads.ini:/usr/local/etc/php/php.ini
+
+volumes:
+  main_mysql:
